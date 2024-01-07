@@ -4,6 +4,8 @@ namespace Mantax559\LaravelSettings\Providers;
 
 use App\Providers\EventServiceProvider;
 use Illuminate\Support\ServiceProvider;
+use Mantax559\LaravelSettings\Models\Setting;
+use Mantax559\LaravelSettings\Observers\SettingObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -18,12 +20,12 @@ class AppServiceProvider extends ServiceProvider
         ], 'config');
 
         $this->loadMigrationsFrom(self::MIGRATION_FILE);
+
+        Setting::observe(SettingObserver::class);
     }
 
     public function register(): void
     {
-        $this->app->register(EventServiceProvider::class);
-        
         $this->mergeConfigFrom(self::CONFIG_FILE, 'laravel-settings');
     }
 }

@@ -74,7 +74,7 @@ class Setting extends Model
         $setting = self::where('key', $key)->first();
 
         if (! $setting) {
-            throw new Exception(__('Setting key :key doesn\'t exist!', ['key' => $key]));
+            throw new Exception(__('Setting key ":key" doesn\'t exist!', ['key' => $key]));
         }
 
         return $setting;
