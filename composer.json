@@ -1,0 +1,45 @@
+{
+  "name": "mantax559/laravel-settings",
+  "description": "Laravel Settings",
+  "type": "library",
+  "license": "MIT",
+  "keywords": [],
+  "authors": [
+    {
+      "name": "mantax559"
+    }
+  ],
+  "require": {
+    "php": "^8.1",
+    "laravel/framework": "^9.0|^10.0"
+  },
+  "require-dev": {
+    "laravel/pint": "^1.13",
+    "orchestra/testbench": "^8.13"
+  },
+  "autoload": {
+    "psr-4": {
+      "Mantax559\\LaravelSettings\\": "src"
+    },
+    "files": [
+      "src/helpers.php"
+    ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Mantax559\\LaravelSettings\\": "tests"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Mantax559\\LaravelSettings\\Providers\\AppServiceProvider"
+      ]
+    }
+  },
+  "config": {
+    "sort-packages": true
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}
