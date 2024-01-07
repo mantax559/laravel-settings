@@ -53,7 +53,7 @@ class Setting extends Model
 
     public static function set(string $key, ?string $value): ?string
     {
-        $setting = Setting::updateOrCreate(['key' => $key], ['value' => $value]);
+        $setting = self::updateOrCreate(['key' => $key], ['value' => $value]);
 
         return $setting->value;
     }
@@ -71,7 +71,7 @@ class Setting extends Model
 
     private static function retrieveSettingByKey(string $key): Setting
     {
-        $setting = Setting::where('key', $key)->first();
+        $setting = self::where('key', $key)->first();
 
         if (! $setting) {
             throw new Exception(__('Setting key :key doesn\'t exist!', ['key' => $key]));
