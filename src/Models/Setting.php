@@ -21,7 +21,7 @@ class Setting extends Model
     {
         parent::__construct($attributes);
 
-        $this->setTable(config('settings.table'));
+        $this->setTable(config('laravel-settings.table'));
     }
 
     public static function isEmpty(string $key): bool
@@ -60,9 +60,9 @@ class Setting extends Model
 
     public static function formatCacheKey(string $key): string
     {
-        $key = implode('.', [config('settings.cache_key_prefix'), $key]);
+        $key = implode('.', [config('laravel-settings.cache_key_prefix'), $key]);
 
-        if (config('settings.encryption')) {
+        if (config('laravel-settings.encryption')) {
             $key = md5($key);
         }
 

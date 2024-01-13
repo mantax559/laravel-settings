@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create(config('settings.table'), function (Blueprint $table) {
+        Schema::create(config('laravel-settings.table'), function (Blueprint $table) {
             $table->id();
             $table->string('key')->unique();
             $table->string('value')->nullable();
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists(config('settings.table'));
+        Schema::dropIfExists(config('laravel-settings.table'));
     }
 };
