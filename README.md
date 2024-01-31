@@ -3,7 +3,7 @@
 ![Packagist](https://img.shields.io/packagist/l/mantax559/laravel-settings?style=flat-square)
 ![PHP from Packagist](https://img.shields.io/packagist/php-v/mantax559/laravel-settings?style=flat-square)
 # Laravel Settings
-## Installation & setup
+## Installation & Setup
 You can install the package via composer:
 
     composer require mantax559/laravel-settings
