@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create(config('laravel-settings.table'), function (Blueprint $table) {
+        Schema::table(config('laravel-settings.table'), function (Blueprint $table) {
             $table->longText('value')->nullable()->change();
         });
     }
@@ -25,7 +25,7 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::create(config('laravel-settings.table'), function (Blueprint $table) {
+        Schema::table(config('laravel-settings.table'), function (Blueprint $table) {
             $table->string('value')->nullable()->change();
         });
     }
