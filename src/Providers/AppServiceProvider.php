@@ -11,7 +11,7 @@ class AppServiceProvider extends ServiceProvider
 {
     private const CONFIG_FILE = __DIR__.'/../../config/laravel-settings.php';
 
-    private const MIGRATION_FILE = __DIR__.'/../../database/migrations/2024_01_07_000001_create_settings_table.php';
+    private const MIGRATION_FILES = __DIR__.'/../../database/migrations';
 
     public function boot(): void
     {
@@ -19,7 +19,7 @@ class AppServiceProvider extends ServiceProvider
             self::CONFIG_FILE => config_path('laravel-settings.php'),
         ], 'config');
 
-        $this->loadMigrationsFrom(self::MIGRATION_FILE);
+        $this->loadMigrationsFrom(self::MIGRATION_FILES);
 
         Setting::observe(SettingObserver::class);
     }
