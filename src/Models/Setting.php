@@ -36,11 +36,11 @@ class Setting extends Model
     /**
      * @throws Exception
      */
-    public static function get(string $key, bool $fetchFromDatabase = false): ?string
+    public static function get(string $key, bool $cache = true): ?string
     {
         $cachedValue = Cache::get(self::formatCacheKey($key));
 
-        if (empty($cachedValue) || $fetchFromDatabase) {
+        if (empty($cachedValue) || ! $cache) {
             $setting = self::retrieveSettingByKey($key);
 
             Cache::forever(self::formatCacheKey($key), $setting->value);
