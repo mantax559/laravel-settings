@@ -70,16 +70,9 @@ class Setting extends Model
      */
     public static function set(string $key, mixed $value): mixed
     {
-        $setting = self::retrieveSettingByKey($key);
+        self::updateOrCreate(['key' => $key], ['value' => $value]);
 
-        $value = match ($setting->type) {
-            SettingTypeEnum::Array => json_encode($value),
-            default => (string) $value,
-        };
-
-        $setting->update(['value' => $value]);
-
-        return $setting->value;
+        return self::get($key);
     }
 
     public static function formatCacheKey(string $key): string
