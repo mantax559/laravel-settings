@@ -51,12 +51,12 @@ class Setting extends Model
             $setting = self::retrieveSettingByKey($key);
 
             $value = match ($setting->type) {
-                SettingTypeEnum::Array => self::decodeJson($key, $value),
-                SettingTypeEnum::String => (string) $value,
-                SettingTypeEnum::Float => (float) $value,
-                SettingTypeEnum::Integer => (int) $value,
-                SettingTypeEnum::Boolean => filter_var($value, FILTER_VALIDATE_BOOLEAN),
-                default => $value,
+                SettingTypeEnum::Array => self::decodeJson($key, $setting->value),
+                SettingTypeEnum::String => (string) $setting->value,
+                SettingTypeEnum::Float => (float) $setting->value,
+                SettingTypeEnum::Integer => (int) $setting->value,
+                SettingTypeEnum::Boolean => filter_var($setting->value, FILTER_VALIDATE_BOOLEAN),
+                default => $setting->value,
             };
 
             Cache::forever($cacheKey, $value);
