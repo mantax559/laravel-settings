@@ -45,22 +45,22 @@ class Setting extends Model
     public static function get(string $key, bool $cache = true): mixed
     {
         $cacheKey = self::formatCacheKey($key);
-        $value = Cache::get($cacheKey);
+        $cacheValue = Cache::get($cacheKey);
 
-        if (Cache::missing($cacheKey) || empty($value) || ! $cache) {
+        if (empty($cacheValue) || ! $cache) {
             $setting = self::retrieveSettingByKey($key);
-
-            $value = match ($setting->type) {
-                SettingTypeEnum::Array => self::decodeJson($key, $setting->value),
-                SettingTypeEnum::String => (string) $setting->value,
-                SettingTypeEnum::Float => (float) $setting->value,
-                SettingTypeEnum::Integer => (int) $setting->value,
-                SettingTypeEnum::Boolean => filter_var($setting->value, FILTER_VALIDATE_BOOLEAN),
-                default => $setting->value,
-            };
-
-            Cache::forever($cacheKey, $value);
+            $cacheValue = ['value' => $setting->value, 'type' => $setting->type];
+            Cache::forever($cacheKey, $cacheValue);
         }
+
+        $value = match ($cacheValue['type']) {
+            SettingTypeEnum::Array => self::decodeJson($key, $cacheValue['value']),
+            SettingTypeEnum::String => (string) $cacheValue['value'],
+            SettingTypeEnum::Float => (float) $cacheValue['value'],
+            SettingTypeEnum::Integer => (int) $cacheValue['value'],
+            SettingTypeEnum::Boolean => filter_var($cacheValue['value'], FILTER_VALIDATE_BOOLEAN),
+            default => $cacheValue['value'],
+        };
 
         return $value;
     }
