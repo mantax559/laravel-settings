@@ -32,11 +32,7 @@ class Setting extends Model
 
     public static function isEmpty(string $key): bool
     {
-        try {
-            return empty(self::get($key));
-        } catch (Exception $e) {
-            return true;
-        }
+        return empty(self::get($key));
     }
 
     /**
@@ -72,7 +68,7 @@ class Setting extends Model
     {
         self::updateOrCreate(['key' => $key], ['value' => $value]);
 
-        return self::get($key);
+        return self::get($key, false);
     }
 
     public static function formatCacheKey(string $key): string
