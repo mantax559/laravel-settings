@@ -13,21 +13,14 @@ class SettingObserver
         $this->encodeValueIfNeeded($setting);
     }
 
-    public function created(Setting $setting): void
-    {
-        Cache::forever(Setting::formatCacheKey($setting->key), $setting->value);
-    }
-
     public function updating(Setting $setting): void
     {
         $this->encodeValueIfNeeded($setting);
-
-        Cache::forget(Setting::formatCacheKey($setting->key));
     }
 
     public function updated(Setting $setting): void
     {
-        Cache::forever(Setting::formatCacheKey($setting->key), $setting->value);
+        Cache::forget(Setting::formatCacheKey($setting->key));
     }
 
     public function deleted(Setting $setting): void
