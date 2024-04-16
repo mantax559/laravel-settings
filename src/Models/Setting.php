@@ -32,7 +32,7 @@ class Setting extends Model
 
     public static function isEmpty(string $key): bool
     {
-        return empty(self::get($key));
+        return self::isEmptyAndNotEqualToZero(self::get($key));
     }
 
     /**
@@ -91,7 +91,7 @@ class Setting extends Model
 
         if (! $setting) {
             throw new Exception("Setting key '$key' doesn\'t exist!");
-        } elseif (empty($setting->value)) {
+        } elseif (self::isEmptyAndNotEqualToZero($setting->value)) {
             throw new Exception("Setting key '$key' value is empty!");
         }
 
@@ -129,10 +129,15 @@ class Setting extends Model
     {
         $value = trim($value);
 
-        if (empty($lowered)) {
+        if (self::isEmptyAndNotEqualToZero($value)) {
             $value = null;
         }
 
         return $value;
+    }
+
+    private static function isEmptyAndNotEqualToZero(?string $value): bool
+    {
+        return empty($value) && $value !== 0 && $value !== '0';
     }
 }
