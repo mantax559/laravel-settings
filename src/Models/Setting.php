@@ -91,8 +91,6 @@ class Setting extends Model
 
         if (! $setting) {
             throw new Exception("Setting key '$key' doesn\'t exist!");
-        } elseif (self::isEmptyAndNotEqualToZero($setting->value)) {
-            throw new Exception("Setting key '$key' value is empty!");
         }
 
         return $setting;
