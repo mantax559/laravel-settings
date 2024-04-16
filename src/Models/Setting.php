@@ -66,6 +66,9 @@ class Setting extends Model
      */
     public static function set(string $key, mixed $value): mixed
     {
+        $key = self::formatKey($key);
+        $value = self::formatValue($value);
+
         self::updateOrCreate(['key' => $key], ['value' => $value]);
 
         return self::get($key, false);
@@ -88,6 +91,8 @@ class Setting extends Model
 
         if (! $setting) {
             throw new Exception("Setting key '$key' doesn\'t exist!");
+        } elseif (empty($setting->value)) {
+            throw new Exception("Setting key '$key' value is empty!");
         }
 
         return $setting;
@@ -102,5 +107,32 @@ class Setting extends Model
         }
 
         return $decoded;
+    }
+
+    /**
+     * @throws Exception
+     */
+    private static function formatKey(string $key): string
+    {
+        $key = trim($key);
+        $key = strtolower($key);
+        $key = str_replace(' ', '_', $key);
+
+        if (empty($key)) {
+            throw new Exception('Setting key cannot be empty!');
+        }
+
+        return $key;
+    }
+
+    private static function formatValue(string $value): string
+    {
+        $value = trim($value);
+
+        if (empty($lowered)) {
+            $value = null;
+        }
+
+        return $value;
     }
 }
