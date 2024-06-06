@@ -40,30 +40,30 @@ class Setting extends Model
         $cacheKey = self::formatCacheKey($key);
         $cacheValue = Cache::get($cacheKey);
 
-        if (empty($cacheValue) || ! $cache) {
+        if (self::isValueEmpty($cacheValue) || ! $cache) {
             $setting = self::retrieveSettingByKey($key);
             $cacheValue = ['value' => $setting->value, 'type' => $setting->type];
             Cache::forever($cacheKey, $cacheValue);
         }
 
         $value = match ($cacheValue['type']) {
-            SettingTypeEnum::Array => self::decodeJson($key, $cacheValue['value']),
+            SettingTypeEnum::Array => self::validateJson($cacheValue['value']),
             SettingTypeEnum::String => (string) $cacheValue['value'],
             SettingTypeEnum::Float => (float) $cacheValue['value'],
             SettingTypeEnum::Integer => (int) $cacheValue['value'],
             SettingTypeEnum::Boolean => filter_var($cacheValue['value'], FILTER_VALIDATE_BOOLEAN),
-            default => $cacheValue['value'],
+            default => throw new Exception("Value type '{$cacheValue['type']}' is not specified!"),
         };
 
         return $value;
     }
 
-    public static function set(string $key, mixed $value): mixed
+    public static function set(string $key, mixed $value, SettingTypeEnum $settingTypeEnum): mixed
     {
         $key = self::formatKey($key);
-        $value = self::formatValue($value);
+        $value = self::formatValue($value, $settingTypeEnum);
 
-        self::updateOrCreate(['key' => $key], ['value' => $value]);
+        self::updateOrCreate(['key' => $key], ['value' => $value, 'type' => $settingTypeEnum]);
 
         return self::get($key, false);
     }
@@ -104,13 +104,15 @@ class Setting extends Model
         return $key;
     }
 
-    private static function formatValue(string $value): ?string
+    private static function formatValue(string $value, SettingTypeEnum $settingTypeEnum): ?string
     {
         $value = trim($value);
         $value = preg_replace('/\s+/', ' ', $value);
 
         if (self::isValueEmpty($value)) {
             return null;
+        } elseif($settingTypeEnum === SettingTypeEnum::Array) {
+            self::validateJson($value);
         }
 
         return $value;
@@ -121,19 +123,14 @@ class Setting extends Model
         return empty($value) && $value !== 0 && $value !== '0';
     }
 
-    private static function decodeJson(string $key, string $value): mixed
+    private static function validateJson(string $value): array
     {
         $decodedJson = json_decode($value, true);
 
-        self::validateJson($key);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new Exception("The provided value is in the wrong JSON format. Error: ".json_last_error_msg());
+        }
 
         return $decodedJson;
-    }
-
-    private static function validateJson(string $key): void
-    {
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new Exception("JSON decoding error for setting key '$key': ".json_last_error_msg());
-        }
     }
 }
