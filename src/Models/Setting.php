@@ -72,11 +72,6 @@ class Setting extends Model
         return self::get($key, false);
     }
 
-    public static function remove(string $key): bool
-    {
-        return self::retrieveSettingByKey($key)->delete();
-    }
-
     public static function formatCacheKey(string $key): string
     {
         $key = implode('.', [config('laravel-settings.cache_key_prefix'), $key]);
@@ -138,7 +133,7 @@ class Setting extends Model
         return empty($value) && ! cmprstr($value, '0');
     }
 
-    private static function validateJson(string $value): array
+    private static function validateJson(string|null $value): array
     {
         $decodedJson = json_decode($value, true);
 
