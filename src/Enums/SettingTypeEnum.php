@@ -8,7 +8,7 @@ enum SettingTypeEnum: string
 {
     use EnumTrait;
 
-    case Array = 'array';
+    case Json = 'json';
     case String = 'string';
     case Float = 'float';
     case Integer = 'integer';

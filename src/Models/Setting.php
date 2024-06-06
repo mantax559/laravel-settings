@@ -47,7 +47,7 @@ class Setting extends Model
         }
 
         $value = match ($cacheValue['type']) {
-            SettingTypeEnum::Array => self::validateJson($cacheValue['value']),
+            SettingTypeEnum::Json => self::validateJson($cacheValue['value']),
             SettingTypeEnum::String => (string) $cacheValue['value'],
             SettingTypeEnum::Float => (float) $cacheValue['value'],
             SettingTypeEnum::Integer => (int) $cacheValue['value'],
@@ -110,7 +110,7 @@ class Setting extends Model
 
     private static function formatValue(string|array|null $value, SettingTypeEnum $settingTypeEnum): ?string
     {
-        if (cmprenum($settingTypeEnum, SettingTypeEnum::Array)) {
+        if (cmprenum($settingTypeEnum, SettingTypeEnum::Json)) {
             if (is_array($value)) {
                 $value = json_encode($value);
             }
