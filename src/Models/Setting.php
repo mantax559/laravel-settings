@@ -111,7 +111,7 @@ class Setting extends Model
 
         if (self::isValueEmpty($value)) {
             return null;
-        } elseif ($settingTypeEnum === SettingTypeEnum::Array) {
+        } elseif (cmprenum($settingTypeEnum, SettingTypeEnum::Array)) {
             if (is_array($value)) {
                 $value = json_encode($value);
             }
@@ -124,14 +124,14 @@ class Setting extends Model
 
     private static function isValueEmpty(?string $value): bool
     {
-        return empty($value) && $value !== 0 && $value !== '0';
+        return empty($value) && ! cmprstr($value, '0');
     }
 
     private static function validateJson(string $value): array
     {
         $decodedJson = json_decode($value, true);
 
-        if (json_last_error() !== JSON_ERROR_NONE) {
+        if (! cmprint(json_last_error(), JSON_ERROR_NONE)) {
             throw new Exception('The provided value is in the wrong JSON format. Error: '.json_last_error_msg());
         }
 
