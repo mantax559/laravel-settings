@@ -58,8 +58,12 @@ class Setting extends Model
         return $value;
     }
 
-    public static function set(string $key, mixed $value, SettingTypeEnum $settingTypeEnum): mixed
+    public static function set(string $key, string|array $value, string|SettingTypeEnum $settingTypeEnum): mixed
     {
+        if (is_string($settingTypeEnum)) {
+            $settingTypeEnum = SettingTypeEnum::getEnumByString($settingTypeEnum);
+        }
+
         $key = self::formatKey($key);
         $value = self::formatValue($value, $settingTypeEnum);
 
@@ -127,7 +131,7 @@ class Setting extends Model
         return $value;
     }
 
-    private static function isValueEmpty(?string $value): bool
+    private static function isValueEmpty(string|array $value): bool
     {
         return empty($value) && ! cmprstr($value, '0');
     }
