@@ -111,7 +111,11 @@ class Setting extends Model
 
         if (self::isValueEmpty($value)) {
             return null;
-        } elseif($settingTypeEnum === SettingTypeEnum::Array) {
+        } elseif ($settingTypeEnum === SettingTypeEnum::Array) {
+            if (is_array($value)) {
+                $value = json_encode($value);
+            }
+
             self::validateJson($value);
         }
 
@@ -128,7 +132,7 @@ class Setting extends Model
         $decodedJson = json_decode($value, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new Exception("The provided value is in the wrong JSON format. Error: ".json_last_error_msg());
+            throw new Exception('The provided value is in the wrong JSON format. Error: '.json_last_error_msg());
         }
 
         return $decodedJson;
