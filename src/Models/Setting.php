@@ -32,46 +32,45 @@ class Setting extends Model
 
     public static function isEmpty(string $key): bool
     {
-        return self::isEmptyAndNotEqualToZero(self::get($key));
+        return self::isValueEmpty(self::get($key));
     }
 
-    /**
-     * @throws Exception
-     */
     public static function get(string $key, bool $cache = true): mixed
     {
         $cacheKey = self::formatCacheKey($key);
         $cacheValue = Cache::get($cacheKey);
 
-        if (empty($cacheValue) || ! $cache) {
+        if (self::isValueEmpty($cacheValue) || ! $cache) {
             $setting = self::retrieveSettingByKey($key);
             $cacheValue = ['value' => $setting->value, 'type' => $setting->type];
             Cache::forever($cacheKey, $cacheValue);
         }
 
         $value = match ($cacheValue['type']) {
-            SettingTypeEnum::Array => self::decodeJson($key, $cacheValue['value']),
+            SettingTypeEnum::Array => self::validateJson($cacheValue['value']),
             SettingTypeEnum::String => (string) $cacheValue['value'],
             SettingTypeEnum::Float => (float) $cacheValue['value'],
             SettingTypeEnum::Integer => (int) $cacheValue['value'],
             SettingTypeEnum::Boolean => filter_var($cacheValue['value'], FILTER_VALIDATE_BOOLEAN),
-            default => $cacheValue['value'],
+            default => throw new Exception("Value type '{$cacheValue['type']}' is not specified!"),
         };
 
         return $value;
     }
 
-    /**
-     * @throws Exception
-     */
-    public static function set(string $key, mixed $value): mixed
+    public static function set(string $key, mixed $value, SettingTypeEnum $settingTypeEnum): mixed
     {
         $key = self::formatKey($key);
-        $value = self::formatValue($value);
+        $value = self::formatValue($value, $settingTypeEnum);
 
-        self::updateOrCreate(['key' => $key], ['value' => $value]);
+        self::updateOrCreate(['key' => $key], ['value' => $value, 'type' => $settingTypeEnum]);
 
         return self::get($key, false);
+    }
+
+    public static function remove(string $key): bool
+    {
+        return self::retrieveSettingByKey($key)->delete();
     }
 
     public static function formatCacheKey(string $key): string
@@ -96,24 +95,11 @@ class Setting extends Model
         return $setting;
     }
 
-    private static function decodeJson(string $key, string $value): mixed
-    {
-        $decoded = json_decode($value, true);
-
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new Exception("JSON decoding error for setting key '$key': ".json_last_error_msg());
-        }
-
-        return $decoded;
-    }
-
-    /**
-     * @throws Exception
-     */
     private static function formatKey(string $key): string
     {
         $key = trim($key);
-        $key = strtolower($key);
+        $key = mb_strtolower($key);
+        $key = preg_replace('/\s+/', ' ', $key);
         $key = str_replace(' ', '_', $key);
 
         if (empty($key)) {
@@ -123,19 +109,37 @@ class Setting extends Model
         return $key;
     }
 
-    private static function formatValue(string $value): string
+    private static function formatValue(string $value, SettingTypeEnum $settingTypeEnum): ?string
     {
         $value = trim($value);
+        $value = preg_replace('/\s+/', ' ', $value);
 
-        if (self::isEmptyAndNotEqualToZero($value)) {
-            $value = null;
+        if (self::isValueEmpty($value)) {
+            return null;
+        } elseif (cmprenum($settingTypeEnum, SettingTypeEnum::Array)) {
+            if (is_array($value)) {
+                $value = json_encode($value);
+            }
+
+            self::validateJson($value);
         }
 
         return $value;
     }
 
-    private static function isEmptyAndNotEqualToZero(?string $value): bool
+    private static function isValueEmpty(?string $value): bool
     {
-        return empty($value) && $value !== 0 && $value !== '0';
+        return empty($value) && ! cmprstr($value, '0');
+    }
+
+    private static function validateJson(string $value): array
+    {
+        $decodedJson = json_decode($value, true);
+
+        if (! cmprint(json_last_error(), JSON_ERROR_NONE)) {
+            throw new Exception('The provided value is in the wrong JSON format. Error: '.json_last_error_msg());
+        }
+
+        return $decodedJson;
     }
 }
