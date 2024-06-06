@@ -32,12 +32,9 @@ class Setting extends Model
 
     public static function isEmpty(string $key): bool
     {
-        return self::isEmptyAndNotEqualToZero(self::get($key));
+        return self::isValueEmpty(self::get($key));
     }
 
-    /**
-     * @throws Exception
-     */
     public static function get(string $key, bool $cache = true): mixed
     {
         $cacheKey = self::formatCacheKey($key);
@@ -61,9 +58,6 @@ class Setting extends Model
         return $value;
     }
 
-    /**
-     * @throws Exception
-     */
     public static function set(string $key, mixed $value): mixed
     {
         $key = self::formatKey($key);
@@ -96,24 +90,11 @@ class Setting extends Model
         return $setting;
     }
 
-    private static function decodeJson(string $key, string $value): mixed
-    {
-        $decoded = json_decode($value, true);
-
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new Exception("JSON decoding error for setting key '$key': ".json_last_error_msg());
-        }
-
-        return $decoded;
-    }
-
-    /**
-     * @throws Exception
-     */
     private static function formatKey(string $key): string
     {
         $key = trim($key);
-        $key = strtolower($key);
+        $key = mb_strtolower($key);
+        $key = preg_replace('/\s+/', ' ', $key);
         $key = str_replace(' ', '_', $key);
 
         if (empty($key)) {
@@ -123,19 +104,36 @@ class Setting extends Model
         return $key;
     }
 
-    private static function formatValue(string $value): string
+    private static function formatValue(string $value): ?string
     {
         $value = trim($value);
+        $value = preg_replace('/\s+/', ' ', $value);
 
-        if (self::isEmptyAndNotEqualToZero($value)) {
-            $value = null;
+        if (self::isValueEmpty($value)) {
+            return null;
         }
 
         return $value;
     }
 
-    private static function isEmptyAndNotEqualToZero(?string $value): bool
+    private static function isValueEmpty(?string $value): bool
     {
         return empty($value) && $value !== 0 && $value !== '0';
+    }
+
+    private static function decodeJson(string $key, string $value): mixed
+    {
+        $decodedJson = json_decode($value, true);
+
+        self::validateJson($key);
+
+        return $decodedJson;
+    }
+
+    private static function validateJson(string $key): void
+    {
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new Exception("JSON decoding error for setting key '$key': ".json_last_error_msg());
+        }
     }
 }
