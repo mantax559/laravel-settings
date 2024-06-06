@@ -58,8 +58,12 @@ class Setting extends Model
         return $value;
     }
 
-    public static function set(string $key, mixed $value, SettingTypeEnum $settingTypeEnum): mixed
+    public static function set(string $key, string|array|null $value, string|SettingTypeEnum $settingTypeEnum): mixed
     {
+        if (is_string($settingTypeEnum)) {
+            $settingTypeEnum = SettingTypeEnum::getEnumByString($settingTypeEnum);
+        }
+
         $key = self::formatKey($key);
         $value = self::formatValue($value, $settingTypeEnum);
 
@@ -109,25 +113,27 @@ class Setting extends Model
         return $key;
     }
 
-    private static function formatValue(string $value, SettingTypeEnum $settingTypeEnum): ?string
+    private static function formatValue(string|array|null $value, SettingTypeEnum $settingTypeEnum): ?string
     {
-        $value = trim($value);
-        $value = preg_replace('/\s+/', ' ', $value);
-
-        if (self::isValueEmpty($value)) {
-            return null;
-        } elseif (cmprenum($settingTypeEnum, SettingTypeEnum::Array)) {
+        if (cmprenum($settingTypeEnum, SettingTypeEnum::Array)) {
             if (is_array($value)) {
                 $value = json_encode($value);
             }
 
             self::validateJson($value);
+        } else {
+            $value = trim($value);
+            $value = preg_replace('/\s+/', ' ', $value);
+
+            if (self::isValueEmpty($value)) {
+                return null;
+            }
         }
 
         return $value;
     }
 
-    private static function isValueEmpty(?string $value): bool
+    private static function isValueEmpty(string|array|null $value): bool
     {
         return empty($value) && ! cmprstr($value, '0');
     }
