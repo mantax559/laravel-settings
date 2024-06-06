@@ -68,6 +68,11 @@ class Setting extends Model
         return self::get($key, false);
     }
 
+    public static function remove(string $key): bool
+    {
+        return self::retrieveSettingByKey($key)->delete();
+    }
+
     public static function formatCacheKey(string $key): string
     {
         $key = implode('.', [config('laravel-settings.cache_key_prefix'), $key]);
