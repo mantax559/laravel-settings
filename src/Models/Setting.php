@@ -133,7 +133,7 @@ class Setting extends Model
         return empty($value) && ! cmprstr($value, '0');
     }
 
-    private static function validateJson(string|null $value): array
+    private static function validateJson(?string $value): array
     {
         $decodedJson = json_decode($value, true);
 
