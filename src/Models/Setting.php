@@ -96,9 +96,7 @@ class Setting extends Model
 
     private static function formatKey(string $key): string
     {
-        $key = trim($key);
-        $key = mb_strtolower($key);
-        $key = preg_replace('/\s+/', ' ', $key);
+        $key = format_string($key, 3);
         $key = str_replace(' ', '_', $key);
 
         if (empty($key)) {
@@ -117,8 +115,7 @@ class Setting extends Model
 
             self::validateJson($value);
         } else {
-            $value = trim($value);
-            $value = preg_replace('/\s+/', ' ', $value);
+            $value = format_string($value);
 
             if (self::isValueEmpty($value)) {
                 return null;
